@@ -1,0 +1,45 @@
+# Deploy Merge-sub to Modal on every push to main (and manual trigger).
+# Required GitHub repository secrets:
+#   MODAL_TOKEN_ID
+#   MODAL_TOKEN_SECRET
+# Create them at: Modal dashboard → Settings → API Tokens
+# Then: GitHub repo → Settings → Secrets and variables → Actions
+
+name: Deploy to Modal
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app.js"
+      - "package.json"
+      - "modal_app.py"
+      - "public/**"
+      - ".github/workflows/deploy-modal.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Modal
+        run: |
+          python -m pip install --upgrade pip
+          pip install modal
+
+      - name: Deploy to Modal
+        run: modal deploy modal_app.py
