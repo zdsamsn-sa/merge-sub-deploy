@@ -33,6 +33,9 @@ PORT = 3000
 volume = modal.Volume.from_name("merge-sub-data", create_if_missing=True)
 
 # Image with Node.js 20 + application source
+# Order matters: install system deps → copy package.json → npm install →
+# copy the rest of the app (add_local_* with copy=True so later steps are allowed).
+# Alternatively keep add_local_dir LAST with no following run_commands.
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .apt_install("curl", "ca-certificates")
@@ -40,10 +43,21 @@ image = (
         "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -",
         "apt-get install -y nodejs",
         "node --version && npm --version",
+        "mkdir -p /app",
     )
+    # Copy only package.json first so npm layer is cacheable
+    .add_local_file(
+        "package.json",
+        remote_path="/app/package.json",
+        copy=True,
+    )
+    .run_commands("cd /app && npm install --omit=dev")
+    # Copy application source into the image (copy=True required if any
+    # further build steps were needed; here it is the last add_local_*)
     .add_local_dir(
-        local_path=".",  # project root when you run modal from this folder
+        local_path=".",
         remote_path="/app",
+        copy=True,
         ignore=[
             "**/node_modules/**",
             "**/.git/**",
@@ -55,9 +69,9 @@ image = (
             "**/*.pyc",
             "**/__pycache__/**",
             "README.md",
+            "modal_app.py",
         ],
     )
-    .run_commands("cd /app && npm install --omit=dev")
 )
 
 app = modal.App(APP_NAME)
@@ -83,6 +97,7 @@ def web():
     env.setdefault("PASSWORD", "admin")
     # If SUB_TOKEN is not set, the Node app auto-generates one from hostname
 
+    # Start Node; Modal keeps the container alive while port PORT is listening
     subprocess.Popen(
         ["node", "app.js"],
         cwd="/app",
