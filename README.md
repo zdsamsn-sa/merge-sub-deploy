@@ -2,7 +2,6 @@
 
 用于合并和管理代理订阅的 Node.js 应用程序。可将多个订阅源合并为一个，并支持通过 URL 参数动态替换节点 Cloudflare 优选域名或 IP。
 
-演示地址：https://merge.zabc.net
 
 ## 功能特点
 
