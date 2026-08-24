@@ -1,0 +1,22 @@
+{
+    "name": "merge-sub",
+    "version": "1.0.0",
+    "description": "Merge and manage proxy subscriptions - Modal ready",
+    "author": "eooce",
+    "repository": "",
+    "license": "MIT",
+    "main": "app.js",
+    "private": false,
+    "scripts": {
+        "start": "node app.js"
+    },
+    "dependencies": {
+        "axios": "^1.13.5",
+        "basic-auth": "^2.0.1",
+        "body-parser": "^1.20.3",
+        "express": "^4.21.2"
+    },
+    "engines": {
+        "node": ">=18"
+    }
+}
