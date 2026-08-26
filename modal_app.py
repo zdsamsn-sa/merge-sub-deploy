@@ -26,6 +26,13 @@ import modal
 import subprocess
 import os
 
+app = modal.App()
+
+
+@app.function(secrets=[modal.Secret.from_name("merge-sub-secrets")])
+def f():
+    print(os.environ["PASSWORD"])
+
 APP_NAME = "merge-sub"
 PORT = 3000
 
