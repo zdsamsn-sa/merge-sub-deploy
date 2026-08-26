@@ -81,10 +81,8 @@ app = modal.App(APP_NAME)
     image=image,
     volumes={"/app/data": volume},
     timeout=86400,  # 24h max container lifetime (Modal will recycle as needed)
-    # Secret name must be exactly: merge-sub-secrets
-    # Create it first (Modal console or CLI), otherwise deploy fails if required=True.
-    # required=False: deploy succeeds even before the secret exists; env fallbacks apply.
-    secrets=[modal.Secret.from_name("merge-sub-secrets", required=False)],
+    # Uncomment after creating the secret (modal secret create merge-sub-secrets ...):
+    # secrets=[modal.Secret.from_name("merge-sub-secrets")],
 )
 @modal.concurrent(max_inputs=50)
 @modal.web_server(port=PORT, startup_timeout=90.0)
