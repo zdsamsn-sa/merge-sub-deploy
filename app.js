@@ -93,28 +93,39 @@ function getSystemUsername() {
 }
 
 // 初始化凭证文件
+// 若设置环境变量 RESET_CREDENTIALS=1，则用当前 USERNAME/PASSWORD 覆盖已有凭证
 async function initializeCredentialsFile() {
     try {
-        // 检查文件是否存在
+        const forceReset = process.env.RESET_CREDENTIALS === '1' || process.env.RESET_CREDENTIALS === 'true';
+        let exists = false;
         try {
             await fs.access(CREDENTIALS_FILE);
+            exists = true;
+        } catch {
+            exists = false;
+        }
+
+        if (exists && !forceReset) {
             console.log('Credentials file already exists');
             return true;
-        } catch {
-            // 文件不存在，创建新文件
-            const initialCredentials = {
-                username: USERNAME,
-                password: PASSWORD
-            };
-
-            await fs.writeFile(
-                CREDENTIALS_FILE,
-                JSON.stringify(initialCredentials, null, 2),
-                'utf8'
-            );
-            console.log('Created new credentials file with environment variables or default admin credentials');
-            return true;
         }
+
+        const initialCredentials = {
+            username: USERNAME,
+            password: PASSWORD
+        };
+
+        await fs.writeFile(
+            CREDENTIALS_FILE,
+            JSON.stringify(initialCredentials, null, 2),
+            'utf8'
+        );
+        console.log(
+            forceReset
+                ? 'RESET_CREDENTIALS=1: credentials overwritten from environment variables'
+                : 'Created new credentials file with environment variables or default admin credentials'
+        );
+        return true;
     } catch (error) {
         console.error('Error initializing credentials file:', error);
         return false;
