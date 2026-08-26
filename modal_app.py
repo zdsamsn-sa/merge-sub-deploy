@@ -26,13 +26,6 @@ import modal
 import subprocess
 import os
 
-app = modal.App()
-
-
-@app.function(secrets=[modal.Secret.from_name("merge-sub-secrets")])
-def f():
-    print(os.environ["PASSWORD"])
-
 APP_NAME = "merge-sub"
 PORT = 3000
 
@@ -88,9 +81,10 @@ app = modal.App(APP_NAME)
     image=image,
     volumes={"/app/data": volume},
     timeout=86400,  # 24h max container lifetime (Modal will recycle as needed)
-    # Secret name must match the one you created in Modal console (or `modal secret create`).
-    # Keys inside: USERNAME, PASSWORD, SUB_TOKEN, (optional) API_URL
-    secrets=[modal.Secret.from_name("merge-sub-secrets")],
+    # Secret name must be exactly: merge-sub-secrets
+    # Create it first (Modal console or CLI), otherwise deploy fails if required=True.
+    # required=False: deploy succeeds even before the secret exists; env fallbacks apply.
+    secrets=[modal.Secret.from_name("merge-sub-secrets", required=False)],
 )
 @modal.concurrent(max_inputs=50)
 @modal.web_server(port=PORT, startup_timeout=90.0)
