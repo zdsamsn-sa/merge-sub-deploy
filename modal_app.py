@@ -5,7 +5,7 @@ Prerequisites:
   1. Install Modal CLI:  pip install modal
   2. Authenticate:       modal setup
   3. (Recommended) Create a secret for credentials:
-       modal secret create merge-sub-secrets \\
+       modal secret create merge-sub \\
          USERNAME=admin \\
          PASSWORD=your_strong_password \\
          SUB_TOKEN=mysecrettoken \\
